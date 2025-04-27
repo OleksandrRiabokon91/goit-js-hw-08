@@ -64,22 +64,10 @@ const images = [
   },
 ];
 
-/* <li class="gallery-item">
-  <a class="gallery-link" href="${original}">
-    Зверни увагу на те, що зображення огорнуте посиланням, у якого атрибут href
-    вказує на шлях до файлу з зображенням. Отже клік по ньому може викликати
-    завантаження зображення на комп’ютер користувача. Заборони цю поведінку за
-    замовчуванням
-    <img
-      class="gallery-image"
-      src="${preview}"
-      data-source="${original}"
-      alt="${description}"
-    />
-  </a>
-</li>; */
+// !====== global
+let instans = null;
 
-// !======================================================
+// !====== rending gallery block
 const container = document.querySelector(".gallery");
 // console.log(container);
 
@@ -100,40 +88,40 @@ function galleryTemplete(array) {
   return array.map(imageTemplate).join("");
 }
 // console.log(galleryTemplete(images));
-function renderGallery() {
-  const markup = galleryTemplete(images);
+function renderGallery(arr) {
+  const markup = galleryTemplete(arr);
   container.innerHTML = markup;
 }
-renderGallery();
+renderGallery(images);
 
-// !======================================================
+// !======== modal window block
 
-function openModal({ preview, original }) {
-  const instance = basicLightbox.create(`
-    <img src="${original}" width="800" height="600">
-`);
+container.addEventListener("click", openModal);
 
-  instance.show();
-  instance.close();
-}
-//
+function openModal(e) {
+  e.preventDefault();
+  const clickedImage = e.target;
 
-container.addEventListener("click", onImageClick);
-
-function onImageClick(event) {
-  event.preventDefault(); // чтобы не переходило по ссылке <a>
-
-  const clickedImage = event.target;
-
-  // Проверяем, что клик был по IMG, а не по <ul>, <li>, <a> и т.д.
   if (clickedImage.nodeName !== "IMG") return;
 
   const largeImageURL = clickedImage.dataset.source;
-  console.log(largeImageURL); // пока просто выводим в консоль
+  console.log(largeImageURL);
 
-  // Если хочешь сразу открывать модалку:
-  const instance = basicLightbox.create(`
+  instance = basicLightbox.create(`
     <img src="${largeImageURL}" width="800" height="600">
   `);
+
   instance.show();
+  window.addEventListener("keydown", closeModalEsc);
+}
+
+function closeModal() {
+  instance.close();
+  window.removeEventListener("keydown", closeModalEsc);
+}
+
+function closeModalEsc(e) {
+  if (e.key === "Escape") {
+    closeModal();
+  }
 }
